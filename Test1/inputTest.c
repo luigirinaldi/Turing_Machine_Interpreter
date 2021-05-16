@@ -19,49 +19,45 @@ int main(){
 		for (int i =0;i<string_size;i++){			
 			*(new_stringArr+i) = *(string_pointer+i);		//copy values from previous array to new array
 		}
-		*(new_stringArr+string_size) = 0;	//initialize spot for next value (probably redundant)
-		free(string_pointer); 				//delete previously created array		
-		string_pointer = new_stringArr;		//update pointer to point to new array
+		*(new_stringArr+string_size) = space_char;	//initialize spot for next value to whitespace
+		free(string_pointer); 						//delete previously created array		
+		string_pointer = new_stringArr;				//update pointer to point to new array
 		in_char = getchar();
 	}
 
 	int* spaces = calloc(string_size,sizeof(int));
-	int num_strings = 1;
+	int num_strings = 0;
 
 	printf("there are %d chars in the string\n",string_size);
-	//printf("%s\n",string_pointer);
 
 	//loop to print chars and find blank spaces(ascii 32)
 	for(int i = 0;i<string_size;i++){
 		//putchar(i+'0');
 		if(*(string_pointer+i) == space_char){
-			//found whitespace print new line char
-			putchar(return_char); 
-    		*(spaces+(num_strings-1)) = i;
+			//found whitespace 
+    		*(spaces+(num_strings)) = i;
 			num_strings++;
-		}else{
-			//character is not a space so print it 
-			putchar(*(string_pointer+i));
 		}
-	}
-	putchar('\n');
+	}	
+    printf("there are %d strings \n",num_strings);
 
 	//CREATE STRING ARRAY
     char** string_array = calloc(num_strings, sizeof(char));
-	if(num_strings > 1){
-		int prevpos = 0;
-		for(int i =0;i<num_strings;i++){
-			char* curr_string = calloc(spaces[i]-prevpos,sizeof(char));		//assign memory space to string 
-			for (int j = prevpos; j<spaces[i];j++){
-				*(curr_string+(j-prevpos)) = *(string_pointer+j);
-			}			
-			*(string_array+i) = curr_string;	//assign current string to ith position of char matrix/string array
-			prevpos = spaces[i];
-		}
+	int prevpos = 0;
+	for(int i = 0;i<num_strings;i++){
+		char* curr_string = calloc(spaces[i]-prevpos,sizeof(char));		//assign memory space to string 
+		for (int j = prevpos; j<spaces[i];j++){
+			*(curr_string+(j-prevpos)) = *(string_pointer+j);
+		}			
+		*(string_array+i) = curr_string;	//assign current string to ith position of char matrix/string array
+		prevpos = spaces[i]+1;
 	}
-	printf("%s\n",string_array[0]);
 
-	printf("finished listening to chars \n");
-    printf("there are %d strings \n",num_strings);
+	for(int i = 0;i<num_strings;i++){
+		printf("['");
+		printf("%s",string_array[i]);
+		printf("'] ");
+	}
+	putchar('\n');
 	return 0;
 }
