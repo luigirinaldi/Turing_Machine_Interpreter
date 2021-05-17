@@ -1,6 +1,5 @@
 #include <stdio.h> 
 #include <stdlib.h> //contains memalloc and other stuff
-#include <string.h>
 
 int main(){
 /*
@@ -21,25 +20,32 @@ int main(){
 	in_char = getchar(); //read first char
 	while(in_char != return_char){ //stop with line break
 		if(in_char != space_char){	//if it is not a space, increment the current string array
+			
 			*(string_pointer+(string_size)) = in_char;	//assign current char to current string (char array pointed to by string_pointer)
 			string_size++;
-			char* new_stringArr = calloc(string_size+1,sizeof(char)); //create new array with correct size
-			memcpy(new_stringArr,string_pointer,string_size);
-			*(new_stringArr+string_size) = space_char;	//initialize spot for next value to whitespace
-			free(string_pointer); 						//delete previously created array		
-			string_pointer = new_stringArr;				//update pointer to point to new array
+			char* new_stringArr = calloc(string_size+1,sizeof(char));	//create new array with correct size
+			for (int i =0;i<string_size;i++){			
+				*(new_stringArr+i) = *(string_pointer+i);				//copy values from previous array to new array
+			}
+			*(new_stringArr+string_size) = space_char;					//initialize spot for next value to whitespace
+			free(string_pointer); 										//delete previously created array		
+			string_pointer = new_stringArr;								//update pointer to point to new array
 		}else{	//if it is a space, it means the current string has finished and it must be added to the string array, which also has to be enlarged
 			//create new array to remove extra final char
 			char* final_string = calloc(string_size,sizeof(char));
-			memcpy(final_string,string_pointer,string_size);
+			for (int i =0;i<string_size;i++){			
+				*(final_string+i) = *(string_pointer+i);			//copy values from previous array to new array
+			}
 			free(string_pointer);
 			string_size = 0;										//reset counter for next string
 			string_pointer = calloc(string_size+1,sizeof(char));	//assign memory for new string
 
-			*(string_array+num_strings) = final_string;		//assign string pointer to string array
+			*(string_array+num_strings) = final_string;				//assign string pointer to string array
 			num_strings++;
 			char** new_string_arr = calloc(num_strings+1,sizeof(char));
-			memcpy(new_string_arr,string_array,num_strings);
+			for (int i =0;i<num_strings;i++){			
+				*(new_string_arr+i) = *(string_array+i);			//copy values from previous array to new array
+			}
 			free(string_array);
 			string_array = new_string_arr;
 		}			
@@ -47,19 +53,20 @@ int main(){
 	}
 	//received return char, finish building string array
 	char* final_string = calloc(string_size,sizeof(char));
-	memcpy(final_string,string_pointer,string_size);
+	for (int i =0;i<string_size;i++){			
+		*(final_string+i) = *(string_pointer+i);	//copy values from previous array to new array
+	}
 	free(string_pointer);
 	string_size = 0;								//reset counter
 
 	*(string_array+num_strings) = final_string;		//assign string pointer to string array
 	num_strings++;
-	printf("%s\n",string_array[0]);	
-/*
+
 	for(int i = 0;i<num_strings;i++){
 		printf("['");
 		printf("%s",string_array[i]);
 		printf("'] ");
 	}
 	putchar('\n');
-*/	return 0;
+	return 0;
 }
