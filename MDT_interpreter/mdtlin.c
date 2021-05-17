@@ -22,6 +22,9 @@
 #include <windows.h> 
 
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#define RESET_STYLE "\x1b[0m"
+#define DEFAULT_COLOR "\x1b[47m\x1b[30m"        //white 
+#define HIGHLIGHT_TEXT "\x1b[31m\x1b[1m"       //bold and red
 
 void custom_delay(int time_in_milliseconds){
     double delay_time = (double)time_in_milliseconds/1000;
@@ -33,15 +36,6 @@ void custom_delay(int time_in_milliseconds){
     }  
 }
 
-void print_string(char input_string[]){
-    putchar('|');
-    for(int i = 0;i<strlen(input_string);i++){
-        putchar(input_string[i]);
-        putchar('|');
-    }
-    //putchar('\n');
-}
-
 int DELAY_TIME = 500; //100 ms
 const int num_states = 4;
 const int num_symbols = 3;
@@ -49,11 +43,15 @@ const int final_state = 3;
 const int initial_state = 0;
 
 int main(){
-    /*
+    
     HANDLE hStdout;
 
     hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleMode(hStdout, ENABLE_VIRTUAL_TERMINAL_PROCESSING);*/
+    DWORD mode, originalMode;
+    GetConsoleMode(hStdout,&mode);
+    originalMode = mode;
+    mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hStdout, mode);
 
 
 
@@ -76,9 +74,13 @@ int main(){
     int prev_cursor_pos = cursor_pos;
     int curr_state = initial_state;                         //start with first state
     
-    printf("\x1b[1;1H\x1b[2J");                             //clear canvas
-    printf("%s\n",input_string);                            //print first time             
-    printf("curr state: %s",states[curr_state]);                  
+    printf("\x1b[1;1H\x1b[2J");                //clear canvas and set cursor to 1,1 and
+    printf("\x1b[?25l");                                    //make cursor invisible 
+    printf(RESET_STYLE);                                      //reset all styles 
+    printf(DEFAULT_COLOR);                               // color with code 37 (white)
+    printf("%s\n",input_string);                            //print first time      
+    char initial_string[] = "curr state: ";       
+    printf("%s%s",initial_string,states[curr_state]);                  
     while(curr_state != final_state){        
         char curr_char = input_string[cursor_pos];
         int curr_symbol;
@@ -99,26 +101,25 @@ int main(){
         //reprint old value 
         printf("\n");				                    //adding so that it works on ipad
         printf("\x1b[1;%df",prev_cursor_pos+1);       	//move cursor to previous char 
-        printf("\x1b[0m");			                    //reset style of previous char
+        printf("%s%s",RESET_STYLE,DEFAULT_COLOR);		//reset style of previous char
         putchar(input_string[prev_cursor_pos]);
 
         //print new value 
         printf("\x1b[1;%df",cursor_pos+1);              //move cursor to cursor pos to update string, +1 because terminal coords start from 1,1
-        //printf("\033[{...}m");			            //set graphics mode for cell and forward
-        //putchar(next_char);                           //print new value
-        printf("\x1b[1;38;5;46m"); 		                //makes it bold green
+        printf(HIGHLIGHT_TEXT);      //highlight text property defined at the start
         putchar(next_char);
         //reset style for cells after the current one
         printf("\x1b[1;%df",cursor_pos+2);	            //move to next cell
-        printf("\x1b[0m");			                    //reset style for cells on forward
+        printf("%s%s",RESET_STYLE,DEFAULT_COLOR);       //reset style for cells on forward
             
         //update current state
         putchar('\n'); //again added so ipad works kinda
-        printf("\x1b[2;13f");                    //move to update current state
+        printf("\x1b[2;%df",strlen(initial_string)+1);                    //move to update current state
         printf("\x1b[0J");                       //clear from cursor to end of line
         printf("%s",states[curr_state]);
-        printf("\x1b[2;%df",13+strlen(states[curr_state]));     //move to after newly printed state
+        printf("\x1b[2;%df",strlen(initial_string)+1+strlen(states[curr_state]));     //move to after newly printed state
         printf("\x1b[0J");                       //clear from cursor to end of line
+        printf(RESET_STYLE);
             
         prev_cursor_pos = cursor_pos;                   //save old position to reset it to normal text
         switch(direction){                              //update cursor pos based on direction        
@@ -139,6 +140,9 @@ int main(){
     putchar('\n');
     printf("finished!\n");
 
+    printf("\x1b[?25h");                    //cursor is back to being visible
+    printf(RESET_STYLE);
+    SetConsoleMode(hStdout,originalMode);
     return 0;
 }
 
