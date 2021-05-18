@@ -19,11 +19,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include <windows.h> 
+#ifdef _WIN32
+    #include <windows.h> 
+#endif 
 
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #define RESET_STYLE "\x1b[0m"
-#define DEFAULT_COLOR "\x1b[47m\x1b[30m"        //white 
+#define DEFAULT_COLOR "\x1b[37m"        //white text
 #define HIGHLIGHT_TEXT "\x1b[31m\x1b[1m"       //bold and red
 
 void custom_delay(int time_in_milliseconds){
@@ -36,6 +38,10 @@ void custom_delay(int time_in_milliseconds){
     }  
 }
 
+void print_tape(char* tape,char* alphabet, char* *alphabet_color){
+
+}
+
 int DELAY_TIME = 500; //100 ms
 const int num_states = 4;
 const int num_symbols = 3;
@@ -43,22 +49,22 @@ const int final_state = 3;
 const int initial_state = 0;
 
 int main(){
+    #ifdef _WIN32
+	HANDLE hStdout;
+    	hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    	DWORD mode, originalMode;
+    	GetConsoleMode(hStdout,&mode);
+    	originalMode = mode;
+    	mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    	SetConsoleMode(hStdout, mode);
     
-    HANDLE hStdout;
-
-    hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD mode, originalMode;
-    GetConsoleMode(hStdout,&mode);
-    originalMode = mode;
-    mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(hStdout, mode);
-
-
+    #endif 
 
     char states[][50] = {"stato dispari","stato pari","cancella tutto","finito :D"};
     
     char work_alphabet[] = {'A','B','-'};
-    
+    char alfabet_color[][10]  = {"\x1b[35m","\x1b[32m","\x1b[37m");
+
     //rows are states, columns are input values
     //dims are, states,inputs and 3 are: value to print, nextstate and direction to move
     int trans_func[][sizeof(work_alphabet)/sizeof(work_alphabet[0])][3]={
@@ -74,11 +80,12 @@ int main(){
     int prev_cursor_pos = cursor_pos;
     int curr_state = initial_state;                         //start with first state
     
-    printf("\x1b[1;1H\x1b[2J");                //clear canvas and set cursor to 1,1 and
+    printf("\x1b[1;1H\x1b[2J");                             //clear canvas and set cursor to 1,1 and
     printf("\x1b[?25l");                                    //make cursor invisible 
-    printf(RESET_STYLE);                                      //reset all styles 
-    printf(DEFAULT_COLOR);                               // color with code 37 (white)
-    printf("%s\n",input_string);                            //print first time      
+    printf(RESET_STYLE);                                    //reset all styles 
+    printf(DEFAULT_COLOR);                                  //color with code 37 (white)
+    printf("%s",input_string);                              //print first time      
+    printf("\x1b[2;1f");				    //position cursor to print state
     char initial_string[] = "curr state: ";       
     printf("%s%s",initial_string,states[curr_state]);                  
     while(curr_state != final_state){        
@@ -117,8 +124,8 @@ int main(){
         printf("\x1b[2;%df",strlen(initial_string)+1);                    //move to update current state
         printf("\x1b[0J");                       //clear from cursor to end of line
         printf("%s",states[curr_state]);
-        printf("\x1b[2;%df",strlen(initial_string)+1+strlen(states[curr_state]));     //move to after newly printed state
-        printf("\x1b[0J");                       //clear from cursor to end of line
+        //printf("\x1b[2;%df",strlen(initial_string)+1+strlen(states[curr_state]));     //move to after newly printed state
+        //printf("\x1b[0J");                       //clear from cursor to end of line
         printf(RESET_STYLE);
             
         prev_cursor_pos = cursor_pos;                   //save old position to reset it to normal text
@@ -142,7 +149,9 @@ int main(){
 
     printf("\x1b[?25h");                    //cursor is back to being visible
     printf(RESET_STYLE);
-    SetConsoleMode(hStdout,originalMode);
+    #ifdef _WIN32
+    	SetConsoleMode(hStdout,originalMode);
+    #endif
     return 0;
 }
 
