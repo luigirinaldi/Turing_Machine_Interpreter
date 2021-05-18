@@ -11,40 +11,60 @@
 
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
 
-void custom_delay(int time_in_milliseconds){
-    double delay_time = (double)time_in_milliseconds/1000;
-    double timediff = 0;
-    clock_t curr_time;
-    curr_time = clock();
-    while(timediff<delay_time){
-        timediff = ((double)clock()/CLOCKS_PER_SEC)-((double)curr_time/CLOCKS_PER_SEC);	
-    }  
-}
-
-void print_string(char input_string[]){
-    putchar('|');
-    for(int i = 0;i<strlen(input_string);i++){
-        putchar(input_string[i]);
-        putchar('|');
-    }
-    //putchar('\n');
-}
+#include "funcs.h"
 
 int main(){
-	clock_t time;
-	time = clock();
-	printf("first time: %ld\n",time);
-	for(int i=0;i<1000000;i++){}
-	clock_t time1;
-	time1 = clock();	
-	printf("second time: %ld\n",time1);
-	printf("time diff: %ld\n",(time1-time));
-	for(int i =0;i<20;i++){	
-		custom_delay(100);
-		printf("time n. %d\n",i);
+	int return_char = 10; //ascii value of \n 
+	int space_char = 32;  //ascii value of whitespace
+	
+	int string_size = 0;
+	int num_strings = 0;
+	char* string_pointer = calloc(string_size+1,sizeof(char));	// "create" array of chars
+	char** string_array = calloc(num_strings+1, sizeof(char));	// create array of array of chars (string array)
+
+	bool new_string = false; 									// used to avoid mulitple spaces counting as empy values
+	int in_char;
+	in_char = getchar(); //read first char
+	while(in_char != return_char){ //stop with line break
+		if(in_char != space_char){	//if it is not a space, increment the current string array
+			new_string = true;
+			*(string_pointer+(string_size)) = in_char;	//assign current char to current string (char array pointed to by string_pointer)
+			string_size++;
+			char* new_stringArr = calloc(string_size+1,sizeof(char)); //create new array with correct size
+			for(int i = 0;i < string_size;i++){
+				*(new_stringArr+i) = *(string_pointer+i);
+			}
+			*(new_stringArr+string_size) = '\0';	    //initialize spot for next value to null value to make proper string
+			free(string_pointer); 						//delete previously created array		
+			string_pointer = new_stringArr;				//update pointer to point to new array
+		}else if (new_string){	//if it is a space, it means the current string has finished and it must be added to the string array, which also has to be enlarged
+			
+			*(string_array+num_strings) = string_pointer;				//assign string pointer to string array
+            string_size = 0;
+			num_strings++;
+			char** new_string_arr = calloc(num_strings+1,sizeof(char));
+			for(int i = 0;i < num_strings;i++){
+				*(new_string_arr+i) = *(string_array+i);
+			}
+			free(string_array);
+			string_array = new_string_arr;
+
+			new_string = false;
+		}			
+		in_char = getchar();		
 	}
+    if (new_string){
+        *(string_array+num_strings) = string_pointer;		//assign string pointer to string array
+        num_strings++;
+    }
+
+    for(int i = 0;i < num_strings;i++){
+        printf("test of working string: %s\n",string_array[i]);
+    }
 	return 0;
 }

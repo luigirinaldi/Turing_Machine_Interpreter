@@ -60,6 +60,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include "funcs.h"          //custom include, to not have functions bloating code
 
 #ifdef _WIN32
     #include <windows.h> 
@@ -67,18 +68,10 @@
 
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #define RESET_STYLE "\x1b[0m"
-#define DEFAULT_COLOR "\x1b[37m"        //white text
+#define DEFAULT_COLOR "\x1b[37m"                //white text
 #define HIGHLIGHT_TEXT "\x1b[31m\x1b[1m"       //bold and red
 
-void custom_delay(int time_in_milliseconds){
-    double delay_time = (double)time_in_milliseconds/1000;
-    double timediff = 0;
-    clock_t curr_time;
-    curr_time = clock();
-    while(timediff<delay_time){
-        timediff = ((double)clock()/CLOCKS_PER_SEC)-((double)curr_time/CLOCKS_PER_SEC);
-    }  
-}
+
 
 void print_tape(char* tape,char* alphabet, char* alphabet_color){
 
