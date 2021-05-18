@@ -51,7 +51,6 @@ int main(){
 			for(int i = 0;i < num_strings;i++){
 				*(new_string_arr+i) = *(string_array+i);
 			}
-			free(string_array);
 			string_array = new_string_arr;
 
 			new_string = false;
