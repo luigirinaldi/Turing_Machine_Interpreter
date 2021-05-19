@@ -11,8 +11,8 @@
 
 */
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h>		//malloc and calloc
+#include <string.h>		//memcpy and strlen
 #include <time.h>
 #include <stdbool.h>
 
@@ -21,6 +21,7 @@
 int main(){
 	int return_char = 10; //ascii value of \n 
 	int space_char = 32;  //ascii value of whitespace
+	int comma_char = 44; 
 	
 	int string_size = 0;
 	int num_strings = 0;
@@ -31,30 +32,28 @@ int main(){
 	int in_char;
 	in_char = getchar(); //read first char
 	while(in_char != return_char){ //stop with line break
-		if(in_char != space_char){	//if it is not a space, increment the current string array
-			new_string = true;
+		if(in_char != space_char && in_char != comma_char){	//if it is not a space, increment the current string array
+			
 			*(string_pointer+(string_size)) = in_char;	//assign current char to current string (char array pointed to by string_pointer)
 			string_size++;
-			char* new_stringArr = calloc(string_size+1,sizeof(char)); //create new array with correct size
-			for(int i = 0;i < string_size;i++){
-				*(new_stringArr+i) = *(string_pointer+i);
-			}
-			*(new_stringArr+string_size) = '\0';	    //initialize spot for next value to null value to make proper string
-			free(string_pointer); 						//delete previously created array		
-			string_pointer = new_stringArr;				//update pointer to point to new array
-		}else if (new_string){	//if it is a space, it means the current string has finished and it must be added to the string array, which also has to be enlarged
+
+			string_pointer = (char*) realloc(string_pointer,(string_size+1) * sizeof(char));  //create new array with correct size
+			*(string_pointer+string_size) = '\0';	    //initialize spot for next value to null value to make proper string
+			new_string = true;
+		}else if (new_string == true){	//if it is a space, it means the current string has finished and it must be added to the string array, which also has to be enlarged
+			char *new_string = (char*) calloc(string_size+1,sizeof(char));					//create new memory to store new string
+			memcpy(new_string,string_pointer,string_size+1);								//copy values from string_pointer to new_string
 			
-			*(string_array+num_strings) = string_pointer;				//assign string pointer to string array
+			*(string_array+num_strings) = new_string;									//assign string pointer to string array
             string_size = 0;
+			string_pointer = (char*) realloc(string_pointer,(string_size+1) * sizeof(char));
+
 			num_strings++;
-			char** new_string_arr = calloc(num_strings+1,sizeof(char));
-			for(int i = 0;i < num_strings;i++){
-				*(new_string_arr+i) = *(string_array+i);
-			}
-			string_array = new_string_arr;
+			string_array = (char**) realloc(string_array,(num_strings+1) * sizeof(char*));		//resize array of strings
 
 			new_string = false;
-		}			
+		}
+
 		in_char = getchar();		
 	}
     if (new_string){
