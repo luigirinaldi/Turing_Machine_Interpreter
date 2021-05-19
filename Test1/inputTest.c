@@ -43,7 +43,7 @@ int main(){
 			string_pointer = calloc(string_size+1,sizeof(char));	//assign memory for new string
 			printf("strings: %d, '%s' \n",num_strings,final_string);
 
-			*(string_array+num_strings) = final_string;		//assign string pointer to string array
+			*(string_array+num_strings) = final_string;				//assign string pointer to string array
 			num_strings++;
 			char** new_string_arr = calloc(num_strings+1,sizeof(char));
 			for(int i = 0;i < num_strings;i++){
