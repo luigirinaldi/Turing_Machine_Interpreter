@@ -98,6 +98,8 @@ int main(){
     	SetConsoleMode(hStdout, mode);    
     #endif 
 
+
+
     //char states[][50] = {"stato dispari","stato pari","cancella tutto","finito :D"};
     char states[][50] = {"0","1","2","3","4","5"};
     
@@ -249,6 +251,7 @@ int main(){
                 prev_cursor_pos++;
                 printf("\n");
                 printf("\x1b[1;1f");                        //move to 1,1
+                printf("%s%s",RESET_STYLE,DEFAULT_COLOR); 
                 printf("%s",tape);                          //print new tape
             } else if(cursor_pos > (tape_len-2)){           //if it is greater than the last '-' then increase the array
                 tape_len++;
@@ -259,6 +262,7 @@ int main(){
                 tape = new_tape;
                 printf("\n");
                 printf("\x1b[1;1f");                        //move to 1,1
+                printf("%s%s",RESET_STYLE,DEFAULT_COLOR); 
                 printf("%s",tape);                          //print new tape
             }
         } else{
