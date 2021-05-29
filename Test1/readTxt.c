@@ -118,11 +118,13 @@ int main(){
             trans_func = (char***) realloc(trans_func,num_states*sizeof(char**));
 
             //initialize trans_func and state_ins
-            for(int i=prev_state_size;i<num_states;i++){
-                state_ins[i] = 0;           //initialize new values to 0
-                trans_func[i] = (char**) calloc(1,sizeof(char*)); //initialize state array containing quadruples
+            if(prev_state_size != num_states){
+                for(int i=prev_state_size;i<num_states;i++){
+                    state_ins[i] = 0;           //initialize new values to 0
+                    trans_func[i] = (char**) calloc(1,sizeof(char*)); //initialize state array containing quadruples
+                }
             }
-            prev_state_size = num_states-1;
+            prev_state_size = num_states;
 
             trans_func[curr_index] = (char**) realloc(trans_func[curr_index],(state_ins[curr_index]+1)*sizeof(char*));           
             
