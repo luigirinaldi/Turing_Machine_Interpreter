@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "es19.h"
+#include "es21.h"
 #include "funcs.h"          //custom include, to not have functions bloating code
 
 #ifdef _WIN32
@@ -31,10 +31,9 @@ int main(){
     #endif    
 
     //options stuff
-    char trailing_lambdas = 1;
+    char trailing_lambdas = 0;
     printf("insert delay\n");
     scanf(" %d",&DELAY_TIME);
-    custom_delay(DELAY_TIME);
     printf("custom options? (y/n)\n");
     char custom_options;
     scanf(" %c",&custom_options);
@@ -77,7 +76,8 @@ int main(){
     printf("%s",tape);                              //print first time      
     printf("\x1b[2;1f");				                    //position cursor to print state
     char initial_string[] = "curr state: ";       
-    printf("%s%s",initial_string,states[curr_state]);           
+    printf("%s%s",initial_string,states[curr_state]);  
+    custom_delay(DELAY_TIME);         
     while(curr_state != final_state){        
         char curr_char = tape[cursor_pos];
         int curr_symbol;
@@ -165,9 +165,10 @@ int main(){
                 reprint_tape = 1;
             } else if(cursor_pos > (tape_len-2)){           //if it is greater than the last '-' then increase the array
                 tape_len++;
-                char *new_tape = (char*) calloc(tape_len,sizeof(char));
+                char *new_tape = (char*) calloc(tape_len+1,sizeof(char));
                 memcpy(new_tape,tape,tape_len-1);         //copy value from old tape to new one, starting from one posisiton ahead
                 new_tape[tape_len-1]='-';
+                new_tape[tape_len] = '\0';
                 free(tape);
                 tape = new_tape;
                 reprint_tape = 1;
