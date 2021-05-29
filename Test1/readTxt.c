@@ -50,7 +50,7 @@ int find_char(char needle,char *haystack,int size){
 
 int main(){
     FILE *file;
-    char *filename = "mdt_mul.txt";
+    char *filename = "bruh.txt";
 
     char *buf = getcwd(NULL, 0); //automagically assigns intself correctly sized buffer for current working directory(cwd)
     if (buf == NULL) {
@@ -83,13 +83,14 @@ int main(){
     char *out_vals = (char*) calloc(num_outs+1,sizeof(char));    
     int curr_index = 0;
 
-    /*int trans_length = 1;
+    int prev_state_size = 0;
+    int *state_ins = (int*) calloc(1,sizeof(int));
     char ***trans_func = (char***) calloc(num_states+1,sizeof(char**));
     char **state_func = (char**) calloc(num_ins+1,sizeof(char*));
-    */
+    
 
-    char trans_func[500][500][4];
-    int state_ins[500] = {0};
+    /*char trans_func[500][500][4];
+    int state_ins[500] = {0};*/
 
     char new_char;
     new_char = fgetc(file);
@@ -102,31 +103,31 @@ int main(){
             for(int i = 0;i<4;i++){
                 quadruple[i] = 0;
             }
-        } else if (new_char == ')' && quintupla == 1){      //finished reading quintuple, reset everything            
-            /*char ***new_trans_func = (char***) calloc(num_states,sizeof(char**)); //resizes transfunc according to number of states
-            memcpy(new_trans_func,trans_func,trans_length);
-            trans_length = num_states;
-            free(trans_func);
-            trans_func = new_trans_func;
+        } else if (new_char == ')' && quintupla == 1){      //finished reading quintuple, reset everything   
+            /*
+            resize state ins array
+            resize transfunc 
+            resize transfunc[curr_index] to state_ins[curr_index size] with realloc
+            assign the new quadruple to transfunc[curr_index][state_ins[curr_index]] 
+            */         
             
-            state_func = (char**) calloc(num_ins,sizeof(char*));
-            printf("%u, %u, index: %d, %d state: %s, %d\n",trans_func,state_func,curr_index,num_ins,states_array[curr_index],num_states);
-            
-            if(trans_func[curr_index] != 0){    //assign to state func the array correspodning to curr index
-                printf("we don't worry for now\n");
-                printf("trans func %u\n",trans_func[curr_index]);
-                free(trans_func[curr_index]);
-            } 
-            
-            int counter = 0;
-            while(trans_func[curr_index][counter]!=0){           //loop to find first empty slot in memory
-                counter++;
-            }*/
-            //char *new_quadruple = (char*) calloc(4,sizeof(char));
-            //memcpy(new_quadruple,quadruple,4);
-            //trans_func[curr_index][counter] = new_quadruple;        //assign quadruple to statefunc
+            //resize state ins array
+            state_ins = (int*) realloc(state_ins,num_states*sizeof(int));           
 
+            //resize trans_func
+            trans_func = (char***) realloc(trans_func,num_states*sizeof(char**));
+
+            //initialize trans_func and state_ins
+            for(int i=prev_state_size;i<num_states;i++){
+                state_ins[i] = 0;           //initialize new values to 0
+                trans_func[i] = (char**) calloc(1,sizeof(char*)); //initialize state array containing quadruples
+            }
+            prev_state_size = num_states-1;
+
+            trans_func[curr_index] = (char**) realloc(trans_func[curr_index],(state_ins[curr_index]+1)*sizeof(char*));           
+            
             int counter = state_ins[curr_index];
+            trans_func[curr_index][counter] = (char*) calloc(4,sizeof(char));
             trans_func[curr_index][counter][0] = quadruple[0];
             trans_func[curr_index][counter][1] = quadruple[1];
             trans_func[curr_index][counter][2] = quadruple[2];
@@ -238,7 +239,7 @@ int main(){
         int j = 0;
         printf(" { %s:\n",states_array[i]);
         while(j<state_ins[i]){
-            printf("    {%c,%c,%d,%c}\n",trans_func[i][j][0],trans_func[i][j][1],trans_func[i][j][2],trans_func[i][j][3]);
+            printf("    {%c,%c,%s,%c}\n",trans_func[i][j][0],trans_func[i][j][1],states_array[trans_func[i][j][2]],trans_func[i][j][3]);
             j++;
         }        
         printf(" }");
