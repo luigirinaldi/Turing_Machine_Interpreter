@@ -88,7 +88,9 @@ int main(){
     char **state_func = (char**) calloc(num_ins+1,sizeof(char*));
     */
 
-    char ***trans_func[500][500][4];
+    char trans_func[500][500][4];
+    int state_ins[500] = {0};
+
     char new_char;
     new_char = fgetc(file);
     while(!feof(file)){ //temporarily i, should be !feof(file)
@@ -115,15 +117,21 @@ int main(){
                 printf("trans func %u\n",trans_func[curr_index]);
                 free(trans_func[curr_index]);
             } 
-            */
+            
             int counter = 0;
             while(trans_func[curr_index][counter]!=0){           //loop to find first empty slot in memory
                 counter++;
-            }
+            }*/
             //char *new_quadruple = (char*) calloc(4,sizeof(char));
             //memcpy(new_quadruple,quadruple,4);
             //trans_func[curr_index][counter] = new_quadruple;        //assign quadruple to statefunc
-            memcpy(trans_func[curr_index][counter],quadruple,4);
+
+            int counter = state_ins[curr_index];
+            trans_func[curr_index][counter][0] = quadruple[0];
+            trans_func[curr_index][counter][1] = quadruple[1];
+            trans_func[curr_index][counter][2] = quadruple[2];
+            trans_func[curr_index][counter][3] = quadruple[3];
+            state_ins[curr_index]++;
             
             q_count = 0;
             quintupla = 0;
@@ -228,11 +236,12 @@ int main(){
     printf("{");
     for(int i=0;i<num_states;i++){
         int j = 0;
-        printf(" {");
-        while(trans_func[i][j]!=NULL){
-            printf("    %d: {%c,%c,%d,%c}\n",i,trans_func[i][j][0],trans_func[i][j][1],trans_func[i][j][2],trans_func[i][j][3]);
-        }
-        printf(" }\n");
+        printf(" { %s:\n",states_array[i]);
+        while(j<state_ins[i]){
+            printf("    {%c,%c,%d,%c}\n",trans_func[i][j][0],trans_func[i][j][1],trans_func[i][j][2],trans_func[i][j][3]);
+            j++;
+        }        
+        printf(" }");
     }
     printf("}\n");
 
