@@ -49,7 +49,7 @@ int read_options(char *abs_path, int opts_out[2],char **initial_string_out, char
             2 trailing_lambdas (y or n),
             3 delay (in ms),
             4 quintuple_format,
-            and more to come (lambda value)
+            and more to come (initial pos,lambda value)
         arg name is delimited by ':'
         arg value is delimited by comma hence, trailing comma is needed
     */
