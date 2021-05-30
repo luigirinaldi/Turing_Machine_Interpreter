@@ -1,7 +1,7 @@
 {
     initial_string:-ABAABABABAB-,
     trailing_lambdas:y,    
-    delay:100,
+    delay:50,
     quintuple_format:[s;i;S;o;d],
 }
 

@@ -33,8 +33,16 @@ int main(){
     	SetConsoleMode(hStdout, mode);    
     #endif    
 
-    //read from file
-    char filename[] = "bruh.txt";
+    //initial terminal display setup
+    printf("\x1b[1;1H\x1b[2J");                             //clear canvas and set cursor to 1,1 and
+    printf(RESET_STYLE);                                    //reset all styles 
+    printf(DEFAULT_COLOR);                                  //color with code 37 (white)
+
+
+    //get filename
+    char filename[MAX_BUF];
+    printf("insert name of mdt txt file in local directory:\n");
+    scanf(" %s",filename);
 
     char buf[MAX_BUF];
 
@@ -42,7 +50,7 @@ int main(){
     if (buf == NULL) {
         printf("failed while retrieving current dir\n");
     }
-    printf("Current working directory: %s\n", buf);
+    //printf("Current working directory: %s\n", buf);
     char abs_path[sizeof(buf)+sizeof(filename)+2];
     sprintf(abs_path,"%s\\%s",buf,filename); //join cwd and filename to get absolute path of txt file
 
@@ -58,14 +66,14 @@ int main(){
         q_format
     );
     
+    DELAY_TIME = opts[1];
 
     if(file_opts < 0){
         printf("important arguments missing from file, add them and retry\n");
+        pause_screen();
         return 0;
     }
-
-
-    
+    /*
     printf("initial string: %s\n",input_string);
     for(int i =0;i<2;i++){
         printf("opt %d: %d\n",i,opts[i]);
@@ -75,7 +83,7 @@ int main(){
         printf("%c ",q_format[i]);
     }
     printf("\n");
-    
+    */
     
 
     char buffer[MAX_BUF];
@@ -118,13 +126,14 @@ int main(){
 
 
     //cmd prompt options stuff
-    char trailing_lambdas = 0;
-    printf("insert delay\n");
-    scanf(" %d",&DELAY_TIME);
-    printf("custom options? (y/n)\n");
+    char trailing_lambdas = opts[1];
+
+    printf("change custom options?(y/n)");
     char custom_options;
     scanf(" %c",&custom_options);
     if(custom_options == 'y'){
+        printf("insert delay\n");
+        scanf(" %d",&DELAY_TIME);
         
         printf("remove trailing lambas? (y/n)\n");
         scanf(" %c",&trailing_lambdas);
@@ -157,11 +166,8 @@ int main(){
     memcpy(tape,input_string,tape_len);
 
     
-    
     printf("\x1b[1;1H\x1b[2J");                             //clear canvas and set cursor to 1,1 and
     printf("\x1b[?25l");                                    //make cursor invisible 
-    printf(RESET_STYLE);                                    //reset all styles 
-    printf(DEFAULT_COLOR);                                  //color with code 37 (white)
     printf("%s",tape);                              //print first time      
     printf("\x1b[2;1f");				                    //position cursor to print state
     char initial_string[] = "curr state: ";       
@@ -284,16 +290,21 @@ int main(){
 
     putchar('\n');
     printf("\x1b[3;1f");                        //move to 3,1
+    printf(RESET_STYLE);
+    printf(HIGHLIGHT_TEXT);
     printf("finished!\n");
 
     
 
     printf("\x1b[?25h");                    //cursor is back to being visible
     printf(RESET_STYLE);
+    printf(DEFAULT_COLOR);
+    pause_screen();
+    
+    printf(RESET_STYLE);
     #ifdef _WIN32
     	SetConsoleMode(hStdout,originalMode);
-    #endif
-
+    #endif   
     return 0;
 }
 

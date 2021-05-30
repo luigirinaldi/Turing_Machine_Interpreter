@@ -4,6 +4,14 @@
 #include <stdlib.h>
 #include <errno.h>
 
+void pause_screen(){
+    printf("Press enter to continue");
+    char enter = 0;
+    enter = getchar();
+    enter = getchar();
+    while (enter != '\r' && enter != '\n') { enter = getchar(); }
+}
+
 void custom_delay(int time_in_milliseconds){
     double delay_time = (double)time_in_milliseconds/1000;
     double timediff = 0;
@@ -50,7 +58,7 @@ int read_options(char *abs_path, int opts_out[2],char **initial_string_out, char
     if(file == NULL){
         printf("file read failed! \n");
     }
-    printf("successfully opened file!\n");
+    //printf("successfully opened file!\n");
 
     //control variables
     int crucial_args = -3; //integer to be incremented each time a crucial arg is found, if it reaches 0 then all important args are present
@@ -172,7 +180,7 @@ int read_options(char *abs_path, int opts_out[2],char **initial_string_out, char
         new_char = fgetc(file);
     }
     fclose(file);
-    printf("finished parsing options %s\n",abs_path);
+    //printf("finished parsing options %s\n",abs_path);
 
     return crucial_args;
 }
@@ -183,10 +191,6 @@ void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *state
         s(input state),i(input char),S(output state),o(output char) and d(direction)
     */   
 
-   for(int i=0;i<5;i++){
-        printf("%c ",q_format[i]);
-    }
-    printf("\n");
 
     FILE *file;
     errno = 0;
@@ -196,7 +200,7 @@ void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *state
         printf("error %s \n",strerror(errno));
         return;
     }
-    printf("successfully opened file!\n");
+    //printf("successfully opened file!\n");
     char quintupla = 0;
     char virgola = 0;
     int q_count = 0;
@@ -227,7 +231,6 @@ void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *state
     /*char trans_func[500][500][4];
     int state_ins[500] = {0};*/
 
-    printf("starting reading file\n");
     char new_char;
     new_char = fgetc(file);
     while(!feof(file)){ //temporarily i, should be !feof(file)
@@ -370,7 +373,6 @@ void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *state
             }
         }
         }
-        printf("works? %c\n",new_char);
         new_char = fgetc(file);
     }
 
@@ -379,21 +381,42 @@ void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *state
     printf("{");
     for(int i=0;i<num_states;i++){
         int j = 0;
-        printf(" { %s:\n",states_array[i]);
+        printf(" {\n  %s:\n",states_array[i]);
         while(j<state_ins[i]){
             printf("    {%c,%c,%s,%c}\n",trans_func[i][j][0],trans_func[i][j][1],states_array[trans_func[i][j][2]],trans_func[i][j][3]);
             j++;
-        }        
-        printf(" }");
+        }     
+        if(i == num_states-1){   
+            printf(" }");
+        } else{
+            printf(" },");
+        }
     }
     printf("}\n");
 
-    printf("[");
-    for(int i =0;i<num_states;i++){
-        printf("'%d',",state_ins[i]);
+    printf("work alphabet: \n[");
+    for(int i =0;i<num_ins;i++){
+        printf("'%c'",in_vals[i]);
+        if(i == num_ins-1){   
+            printf("");
+        } else{
+            printf(",");
+        }
     }
     printf("]\n");
-    
+
+    printf("states: \n[");
+    for(int i =0;i<num_states;i++){
+        printf("'%s'",states_array[i]);
+        if(i == num_states-1){   
+            printf("");
+        } else{
+            printf(",");
+        }
+    }
+    printf("]\n");
+
+
     fclose(file);
     (*trans_func_out) = trans_func;
     (*states_array_out) = states_array;
