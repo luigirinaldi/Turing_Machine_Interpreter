@@ -8,5 +8,5 @@
 - Time taken and number of steps
 
 ### Some useful links:
-http://rosettacode.org/wiki/Terminal_control/Cursor_positioning
+http://rosettacode.org/wiki/Terminal_control/Cursor_positioning <br>
 https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
