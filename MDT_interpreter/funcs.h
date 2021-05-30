@@ -31,7 +31,147 @@ int find_char(char needle,char *haystack,int size){
     return -1;
 }
 
-void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***states_array_out,char **in_vals_out, int *alphabet_size,int **state_ins_out){
+#define num_args 4 //need to use define as it is for array initializing
+
+int read_options(char *abs_path, int opts_out[2],char **initial_string_out, char q_format_out[5]){
+    /*
+        reads options between curly brackets, options can be:
+            1 initial_string,
+            2 trailing_lambdas (y or n),
+            3 delay (in ms),
+            4 quintuple_format,
+            and more to come (lambda value)
+        arg name is delimited by ':'
+        arg value is delimited by comma hence, trailing comma is needed
+    */
+    FILE *file;
+    file = fopen(abs_path,"r");
+    if(file == NULL){
+        printf("file read failed! \n");
+    }
+    printf("successfully opened file!\n");
+
+    //control variables
+    char found_opts = 0;
+    char reading_q = 0;
+    char q_count = 0;
+    char read_state = 0; //0 is reading the arg name, other point to value type
+    char *new_string = (char*) calloc(1,sizeof(char));
+    int string_len = 0;
+    char arg_names[num_args][50] = {
+        "initial_string",
+        "trailing_lambdas",
+        "delay",
+        "quintuple_format",
+    };
+
+    char new_char;
+    new_char = fgetc(file);
+    while(new_char != '}'){
+        if(new_char == '{'){
+            found_opts = 1;
+        } else if (found_opts == 1 && new_char != ' ' && new_char != '\n'){
+            if(read_state == 0){
+                if(new_char == ':'){
+                    //arg name finished, find out what arg it is
+                    for (int i = 0;i<num_args;i++){
+                        if(strcmp(new_string,arg_names[i]) == 0){
+                            read_state = i+1;
+                            break;
+                        }
+                    }
+                    string_len = 0;
+                    new_string = (char*) realloc(new_string, (string_len+1)*sizeof(char));
+                    new_string[string_len] = '\0'; //terminating string 
+                } else {
+                    //reading arg name 
+                    new_string[string_len] = new_char;
+                    string_len++;
+                    new_string = (char*) realloc(new_string, (string_len+1)*sizeof(char)); //making array larger
+                    new_string[string_len] = '\0'; //terminating string 
+                }
+            } else {
+                //argument values
+                switch(read_state)
+                {
+                    case(1): {
+                        //initial_string
+                        if(new_char != ','){
+                            new_string[string_len] = new_char;
+                            string_len++;
+                            new_string = (char*) realloc(new_string, (string_len+1)*sizeof(char)); //making array larger
+                            new_string[string_len] = '\0'; //terminating string 
+                        } else{
+                            (*initial_string_out) = new_string;
+
+                            read_state = 0;
+
+                            string_len = 0;
+                            new_string = (char*) calloc(string_len+1,sizeof(char));
+                            new_string[string_len] = '\0'; //terminating string 
+                        }
+                        break;
+                    }
+                    case(2): {
+                        //trailing lambdas
+                        if(new_char == 'y'){
+                            opts_out[0] = 1;
+                        } else if(new_char == 'n'){
+                            opts_out[0] = 0;
+                        } else if(new_char == ','){
+                            //wait for comma to advance read state
+                            read_state = 0;
+                        }
+                        break;
+                    }
+                    case (3): {
+                        //delay 
+                        if(new_char == ','){
+                            opts_out[1] = atoi(new_string);
+
+                            read_state = 0;
+
+                            string_len = 0;
+                            new_string = (char*) realloc(new_string, (string_len+1)*sizeof(char));
+                            new_string[string_len] = '\0'; //terminating string 
+                        } else {
+                            new_string[string_len] = new_char;
+                            string_len++;
+                            new_string = (char*) realloc(new_string, (string_len+1)*sizeof(char)); //making array larger
+                            new_string[string_len] = '\0'; //terminating string 
+                        }
+                        break;
+                    }
+                    case(4): {
+                        //quintuple format
+                        if(new_char == ','){
+                            read_state = 0;
+                        } else{
+                            if(new_char == '[' && reading_q == 0){
+                                reading_q = 1;
+                            } else if (new_char == ';'){
+                                reading_q = 1;
+                                q_count++;
+                            } else if (reading_q == 1 && q_count < 5){
+                                q_format_out[q_count] = new_char;
+                                reading_q = 0;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        //putchar(new_char);
+        new_char = fgetc(file);
+    }
+}
+
+void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *states_size,char ***states_array_out,char **in_vals_out, int *alphabet_size,int **state_ins_out){
+    /*
+        q format is composed of:
+        s(input state),i(input char),S(output state),o(output char) and d(direction)
+    */    
     FILE *file;
     file = fopen(abs_path,"r");
     if(file == NULL){
@@ -42,6 +182,7 @@ void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***st
     char quintupla = 0;
     char virgola = 0;
     int q_count = 0;
+    
 
     char quadruple[4] = {0,0,0,0};
 
@@ -73,8 +214,10 @@ void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***st
     while(!feof(file)){ //temporarily i, should be !feof(file)
         if(new_char == ','){
             virgola = 1;
-        } else if (new_char == '(' && quintupla == 0){
+        } else{
+        if (new_char == '(' && quintupla == 0){
             quintupla = 1;
+            virgola = 0;
             //reset vals
             for(int i = 0;i<4;i++){
                 quadruple[i] = 0;
@@ -117,7 +260,7 @@ void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***st
         } else if (quintupla == 1 && q_count < 5){
             if(virgola == 1){
                 virgola = 0;
-                if(q_count == 0){
+                if(q_format[q_count] == 's'){
                     //this means state has stopped being read, and it can be added to state array
                     curr_index = find_index(new_string,states_array,num_states);
                     if(curr_index == -1){
@@ -130,7 +273,7 @@ void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***st
                     string_length = 0;
                     new_string  = (char*) calloc(string_length+1,sizeof(char));                    
                     new_string[0] = '\0';                
-                } else if (q_count == 2){
+                } else if (q_format[q_count] == 'S'){
                     //finished reading the outgoing state
                     int out_index = find_index(new_string,states_array,num_states);
                     if(out_index == -1){
@@ -144,16 +287,23 @@ void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***st
                     string_length = 0;
                     new_string  = (char*) calloc(string_length+1,sizeof(char));                    
                     new_string[0] = '\0';       
-                }     
-                q_count++;
+                }   
+
+                q_count++; //increments q_counter, to know what the next value should be interpreted as
             }
-            if(q_count == 0){ 
-                //contatore 0, quindi sto leggendo lo stato
+            switch (q_format[q_count])
+            {
+            case ('s'):
+            {
+                //reading current state
                 new_string[string_length] = new_char;
                 string_length++;
                 new_string = (char*) realloc(new_string,(string_length+1)*sizeof(char));  //resize string array to fit next value
                 new_string[string_length] ='\0';      //adding terminator char to end string
-            } else if (q_count ==1){
+                break;
+            }
+            case ('i'):
+            {
                 //reading first input 
                 quadruple[0] = new_char;
 
@@ -164,16 +314,22 @@ void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***st
                     in_vals[num_ins-1] = new_char;
                     in_pos = num_ins -1;
                 }
-            } else if (q_count == 2){
-                //output state 
+                break;
+            }
+            case ('S'):
+            {
+                //reading outgoing state
                 new_string[string_length] = new_char;
                 string_length++;
                 new_string = (char*) realloc(new_string,(string_length+1)*sizeof(char));  //resize string array to fit next value
                 new_string[string_length] ='\0';      //adding terminator char to end string
-            } else if (q_count == 3){
-                //reading output
+                break;
+            }
+            case ('o'):
+            {
+                //reading outgoing char
                 quadruple[1] = new_char;
-
+                //add to alphabet 
                 int in_pos = find_char(new_char,in_vals,num_ins);
                 if(in_pos == -1){
                     num_ins++;
@@ -181,13 +337,24 @@ void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***st
                     in_vals[num_ins-1] = new_char;
                     in_pos = num_ins -1;
                 }
-            } else if (q_count == 4){
-                //direction char
-                quadruple[3] = new_char;
+                break;
             }
+            case ('d'):
+            {
+                //reading direction
+                quadruple[3] = new_char;
+                break;
+            }
+            default:
+                break;
+            }
+        }
         }
         new_char = fgetc(file);
     }
+
+    
+    //printing stuff
     printf("{");
     for(int i=0;i<num_states;i++){
         int j = 0;
@@ -205,6 +372,8 @@ void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***st
         printf("'%d',",state_ins[i]);
     }
     printf("]\n");
+    
+
     (*trans_func_out) = trans_func;
     (*states_array_out) = states_array;
     (*state_ins_out) = state_ins;

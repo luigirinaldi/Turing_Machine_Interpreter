@@ -31,7 +31,72 @@ int main(){
     	SetConsoleMode(hStdout, mode);    
     #endif    
 
-    //options stuff
+    //read from file
+    char *filename = "bruh.txt";
+
+    char *buf = getcwd(NULL, 0); //automagically assigns intself correctly sized buffer for current working directory(cwd)
+    if (buf == NULL) {
+        printf("failed while retrieving current dir\n");
+    }
+    printf("Current working directory: %s\n", buf);
+    char abs_path[sizeof(buf)+sizeof(filename)+2];
+    sprintf(abs_path,"%s\\%s",buf,filename); //join cwd and filename to get absolute path of txt file
+    
+    //read options
+    int opts[2];
+    char *initial_string;
+    char q_format[5];
+
+    int file_opts = read_options(
+        abs_path,
+        opts,
+        &initial_string,
+        q_format
+    );
+
+    printf("initial string: %s\n",initial_string);
+    for(int i =0;i<2;i++){
+        printf("opt %d: %d\n",i,opts[i]);
+    }
+
+    for(int i=0;i<5;i++){
+        printf("%c ",q_format[i]);
+    }
+    printf("\n");
+
+/*
+    //read trans func and other functional stuff
+    char q_format[5] = {'s','i','S','o','d'};
+    char ***trans_func;
+    int num_states;
+    char **states;
+    char *alphabet;
+    int alphabet_size;
+    int *state_in_sizes;
+
+    read_mdt(
+        q_format,
+        abs_path, 
+        &trans_func,
+        &num_states,
+        &states,
+        &alphabet,
+        &alphabet_size,
+        &state_in_sizes
+    );
+
+    printf("num states: %d\n",num_states);
+    int initial_state = 0;
+    int final_state;
+    
+    for(int i =0;i<num_states;i++){
+        if(state_in_sizes[i] ==0){
+            final_state = i;
+        }
+    }
+
+
+    //cmd prompt options stuff
     char trailing_lambdas = 0;
     printf("insert delay\n");
     scanf(" %d",&DELAY_TIME);
@@ -58,46 +123,8 @@ int main(){
     printf("this is where the fun begins\n");
     custom_delay(DELAY_TIME);
 
-    char *filename = "bruh.txt";
-
-    char *buf = getcwd(NULL, 0); //automagically assigns intself correctly sized buffer for current working directory(cwd)
-    if (buf == NULL) {
-        printf("failed while retrieving current dir\n");
-    }
-    printf("Current working directory: %s\n", buf);
-    char abs_path[sizeof(buf)+sizeof(filename)+2];
-    sprintf(abs_path,"%s\\%s",buf,filename); //join cwd and filename to get absolute path of txt file
     
-    char ***trans_func;
-    int num_states;
-    char **states;
-    char *alphabet;
-    int alphabet_size;
-    int *state_in_sizes;
-
-    read_mdt(
-        abs_path, 
-        &trans_func,
-        &num_states,
-        &states,
-        &alphabet,
-        &alphabet_size,
-        &state_in_sizes
-    );
-
-    printf("num states: %d\n",num_states);
-    int initial_state = 0;
-    int final_state;
-    
-    for(int i =0;i<num_states;i++){
-        printf("%d, %d",i,state_in_sizes[i]);
-        if(state_in_sizes[i] ==0){
-
-            final_state = i;
-            printf("final state is %d\n",final_state);
-        }
-    }
-
+/*
     int cursor_pos = 1;                                     //start on first valid letter
     int prev_cursor_pos = cursor_pos;
     int curr_state = initial_state;                         //start with first state
@@ -232,16 +259,20 @@ int main(){
         }
         custom_delay(DELAY_TIME);
     }
+    
 
     putchar('\n');
     printf("\x1b[3;1f");                        //move to 3,1
     printf("finished!\n");
+
+    */
 
     printf("\x1b[?25h");                    //cursor is back to being visible
     printf(RESET_STYLE);
     #ifdef _WIN32
     	SetConsoleMode(hStdout,originalMode);
     #endif
+
     return 0;
 }
 

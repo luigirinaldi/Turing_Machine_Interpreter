@@ -1,25 +1,33 @@
-           (stato iniziale,A,1,A,>)
-           (stato iniziale,B,2,B,>)
-           (stato iniziale,-,7,-,-)      
+{
+    initial_string:-ABAABABABAB-,
+    trailing_lambdas:y,
+    delay:1000,
+    quintuple_format:[i;s;o;S;d],
+}
 
-           (1,A,3,*,>)
-           (1,B,stato iniziale,B,-)
-           (1,-,7,-,-)   
 
-           (2,B,3,*,>)
-           (2,A,stato iniziale,A,-)
-           (2,-,7,-,-) 
+(stato iniziale,A,1,A,>)
+(stato iniziale,B,2,B,>)
+(stato iniziale,-,7,-,-)      
 
-           (3,A,4,*,<)
-           (3,B,5,*,<)
-           (3,*,3,*,>)
-           (3,-,6,-,<)
+(1,A,3,*,>)
+(1,B,stato iniziale,B,-)
+(1,-,7,-,-)   
 
-           (4,*,3,A,>)
+(2,B,3,*,>)
+(2,A,stato iniziale,A,-)
+(2,-,7,-,-) 
 
-           (5,*,3,B,>)
-           
-           (6,*,6,-,<)
-           (6,A,6,A,<)
-           (6,B,6,B,<)
-           (6,-,stato iniziale,-,>)
+(3,A,4,*,<)
+(3,B,5,*,<)
+(3,*,3,*,>)
+(3,-,6,-,<)
+
+(4,*,3,A,>)
+
+(5,*,3,B,>)
+
+(6,*,6,-,<)
+(6,A,6,A,<)
+(6,B,6,B,<)
+(6,-,stato iniziale,-,>)
