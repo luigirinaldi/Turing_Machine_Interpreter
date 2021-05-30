@@ -77,17 +77,18 @@ int main(){
 
     read_mdt(
         abs_path, 
-        trans_func,
+        &trans_func,
         &num_states,
-        states,
-        alphabet,
+        &states,
+        &alphabet,
         &alphabet_size,
-        state_in_sizes
+        &state_in_sizes
     );
 
     printf("num states: %d\n",num_states);
     int initial_state = 0;
     int final_state;
+    
     for(int i =0;i<num_states;i++){
         printf("%d, %d",i,state_in_sizes[i]);
         if(state_in_sizes[i] ==0){
@@ -96,6 +97,7 @@ int main(){
             printf("final state is %d\n",final_state);
         }
     }
+
     int cursor_pos = 1;                                     //start on first valid letter
     int prev_cursor_pos = cursor_pos;
     int curr_state = initial_state;                         //start with first state
@@ -122,7 +124,7 @@ int main(){
         int curr_symbol;
         char found = 0;
         
-        for(int i = 0; i < state_in_sizes[i] && found != 1;i++){                //find index of current input, by comparing first value of innermost array
+        for(int i = 0; i < alphabet_size && found != 1;i++){                //find index of current input, by comparing first value of innermost array
             if(trans_func[curr_state][i][0]==curr_char){
                 curr_symbol = i;
                 found = 1;              

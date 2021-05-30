@@ -1,13 +1,13 @@
-           (0,A,1,A,>)
-           (0,B,2,B,>)
-           (0,-,7,-,-)      
+           (stato iniziale,A,1,A,>)
+           (stato iniziale,B,2,B,>)
+           (stato iniziale,-,7,-,-)      
 
            (1,A,3,*,>)
-           (1,B,0,B,-)
+           (1,B,stato iniziale,B,-)
            (1,-,7,-,-)   
 
            (2,B,3,*,>)
-           (2,A,0,A,-)
+           (2,A,stato iniziale,A,-)
            (2,-,7,-,-) 
 
            (3,A,4,*,<)
@@ -22,4 +22,4 @@
            (6,*,6,-,<)
            (6,A,6,A,<)
            (6,B,6,B,<)
-           (6,-,0,-,>)
+           (6,-,stato iniziale,-,>)

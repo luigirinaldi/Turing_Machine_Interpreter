@@ -31,7 +31,7 @@ int find_char(char needle,char *haystack,int size){
     return -1;
 }
 
-void read_mdt(char *abs_path,char ***trans_func,int *states_size,char **states_array,char *in_vals, int *alphabet_size,int *state_ins){
+void read_mdt(char *abs_path,char ****trans_func_out,int *states_size,char ***states_array_out,char **in_vals_out, int *alphabet_size,int **state_ins_out){
     FILE *file;
     file = fopen(abs_path,"r");
     if(file == NULL){
@@ -59,10 +59,10 @@ void read_mdt(char *abs_path,char ***trans_func,int *states_size,char **states_a
     char **state_func = (char**) calloc(num_ins+1,sizeof(char*));
 
     //parameter initialization
-    trans_func = (char***) calloc(num_states+1,sizeof(char**));
-    states_array = (char**) calloc(num_states+1,sizeof(char*));
-    in_vals = (char*) calloc(num_ins+1,sizeof(char));    
-    state_ins = (int*) calloc(1,sizeof(int));  
+    char ***trans_func = (char***) calloc(num_states+1,sizeof(char**));
+    char **states_array = (char**) calloc(num_states+1,sizeof(char*));
+    char *in_vals = (char*) calloc(num_ins+1,sizeof(char));    
+    int *state_ins = (int*) calloc(1,sizeof(int));  
     
 
     /*char trans_func[500][500][4];
@@ -199,6 +199,16 @@ void read_mdt(char *abs_path,char ***trans_func,int *states_size,char **states_a
         printf(" }");
     }
     printf("}\n");
+
+    printf("[");
+    for(int i =0;i<num_states;i++){
+        printf("'%d',",state_ins[i]);
+    }
+    printf("]\n");
+    (*trans_func_out) = trans_func;
+    (*states_array_out) = states_array;
+    (*state_ins_out) = state_ins;
+    (*in_vals_out) = in_vals;
     (*alphabet_size) = num_ins;
     (*states_size) = num_states;
 }
