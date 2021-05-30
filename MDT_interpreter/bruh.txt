@@ -1,8 +1,8 @@
 {
     initial_string:-ABAABABABAB-,
-    trailing_lambdas:y,
-    delay:1000,
-    quintuple_format:[i;s;o;S;d],
+    trailing_lambdas:y,    
+    delay:100,
+    quintuple_format:[s;i;S;o;d],
 }
 
 

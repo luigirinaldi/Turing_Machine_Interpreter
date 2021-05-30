@@ -2,6 +2,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+#include <errno.h>
 
 void custom_delay(int time_in_milliseconds){
     double delay_time = (double)time_in_milliseconds/1000;
@@ -52,6 +53,7 @@ int read_options(char *abs_path, int opts_out[2],char **initial_string_out, char
     printf("successfully opened file!\n");
 
     //control variables
+    int crucial_args = -3; //integer to be incremented each time a crucial arg is found, if it reaches 0 then all important args are present
     char found_opts = 0;
     char reading_q = 0;
     char q_count = 0;
@@ -97,11 +99,13 @@ int read_options(char *abs_path, int opts_out[2],char **initial_string_out, char
                     case(1): {
                         //initial_string
                         if(new_char != ','){
+
                             new_string[string_len] = new_char;
                             string_len++;
                             new_string = (char*) realloc(new_string, (string_len+1)*sizeof(char)); //making array larger
                             new_string[string_len] = '\0'; //terminating string 
-                        } else{
+                        } else{                            
+                            crucial_args++;
                             (*initial_string_out) = new_string;
 
                             read_state = 0;
@@ -127,6 +131,7 @@ int read_options(char *abs_path, int opts_out[2],char **initial_string_out, char
                     case (3): {
                         //delay 
                         if(new_char == ','){
+                            crucial_args++;
                             opts_out[1] = atoi(new_string);
 
                             read_state = 0;
@@ -145,6 +150,7 @@ int read_options(char *abs_path, int opts_out[2],char **initial_string_out, char
                     case(4): {
                         //quintuple format
                         if(new_char == ','){
+                            crucial_args++;
                             read_state = 0;
                         } else{
                             if(new_char == '[' && reading_q == 0){
@@ -165,17 +171,29 @@ int read_options(char *abs_path, int opts_out[2],char **initial_string_out, char
         //putchar(new_char);
         new_char = fgetc(file);
     }
+    fclose(file);
+    printf("finished parsing options %s\n",abs_path);
+
+    return crucial_args;
 }
 
 void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *states_size,char ***states_array_out,char **in_vals_out, int *alphabet_size,int **state_ins_out){
     /*
         q format is composed of:
         s(input state),i(input char),S(output state),o(output char) and d(direction)
-    */    
+    */   
+
+   for(int i=0;i<5;i++){
+        printf("%c ",q_format[i]);
+    }
+    printf("\n");
+
     FILE *file;
+    errno = 0;
     file = fopen(abs_path,"r");
     if(file == NULL){
-        printf("file read failed! \n");
+        printf("file read failed for %s \n",abs_path);
+        printf("error %s \n",strerror(errno));
         return;
     }
     printf("successfully opened file!\n");
@@ -209,12 +227,13 @@ void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *state
     /*char trans_func[500][500][4];
     int state_ins[500] = {0};*/
 
+    printf("starting reading file\n");
     char new_char;
     new_char = fgetc(file);
     while(!feof(file)){ //temporarily i, should be !feof(file)
         if(new_char == ','){
             virgola = 1;
-        } else{
+        }
         if (new_char == '(' && quintupla == 0){
             quintupla = 1;
             virgola = 0;
@@ -291,6 +310,7 @@ void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *state
 
                 q_count++; //increments q_counter, to know what the next value should be interpreted as
             }
+            else {
             switch (q_format[q_count])
             {
             case ('s'):
@@ -350,6 +370,7 @@ void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *state
             }
         }
         }
+        printf("works? %c\n",new_char);
         new_char = fgetc(file);
     }
 
@@ -373,7 +394,7 @@ void read_mdt(char q_format[5],char *abs_path,char ****trans_func_out,int *state
     }
     printf("]\n");
     
-
+    fclose(file);
     (*trans_func_out) = trans_func;
     (*states_array_out) = states_array;
     (*state_ins_out) = state_ins;

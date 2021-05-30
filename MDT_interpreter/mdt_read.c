@@ -17,8 +17,10 @@
 #define HIGHLIGHT_TEXT "\x1b[31m\x1b[1m"       //bold and red
 
 
-char input_string[] = "-AABBABBABBA-";
+
 int DELAY_TIME = 500; //100 ms
+
+#define MAX_BUF 200
 
 int main(){
     #ifdef _WIN32
@@ -32,29 +34,39 @@ int main(){
     #endif    
 
     //read from file
-    char *filename = "bruh.txt";
+    char filename[] = "bruh.txt";
 
-    char *buf = getcwd(NULL, 0); //automagically assigns intself correctly sized buffer for current working directory(cwd)
+    char buf[MAX_BUF];
+
+    getcwd(buf, MAX_BUF); //automagically assigns intself correctly sized buffer for current working directory(cwd)
     if (buf == NULL) {
         printf("failed while retrieving current dir\n");
     }
     printf("Current working directory: %s\n", buf);
     char abs_path[sizeof(buf)+sizeof(filename)+2];
     sprintf(abs_path,"%s\\%s",buf,filename); //join cwd and filename to get absolute path of txt file
-    
+
     //read options
     int opts[2];
-    char *initial_string;
+    char *input_string;
     char q_format[5];
 
     int file_opts = read_options(
         abs_path,
         opts,
-        &initial_string,
+        &input_string,
         q_format
     );
+    
 
-    printf("initial string: %s\n",initial_string);
+    if(file_opts < 0){
+        printf("important arguments missing from file, add them and retry\n");
+        return 0;
+    }
+
+
+    
+    printf("initial string: %s\n",input_string);
     for(int i =0;i<2;i++){
         printf("opt %d: %d\n",i,opts[i]);
     }
@@ -63,10 +75,19 @@ int main(){
         printf("%c ",q_format[i]);
     }
     printf("\n");
+    
+    
 
-/*
+    char buffer[MAX_BUF];
+    getcwd(buffer, MAX_BUF); //automagically assigns intself correctly sized buffer for current working directory(cwd)
+    if (buffer == NULL) {
+        printf("failed while retrieving current dir\n");
+    }
+    //printf("Current working directory: %s\n", buffer);
+    char file_path[sizeof(buffer)+sizeof(filename)+2];
+    sprintf(file_path,"%s\\%s",buffer,filename); //join cwd and filename to get absolute path of txt file
+    
     //read trans func and other functional stuff
-    char q_format[5] = {'s','i','S','o','d'};
     char ***trans_func;
     int num_states;
     char **states;
@@ -76,7 +97,7 @@ int main(){
 
     read_mdt(
         q_format,
-        abs_path, 
+        file_path, 
         &trans_func,
         &num_states,
         &states,
@@ -124,7 +145,7 @@ int main(){
     custom_delay(DELAY_TIME);
 
     
-/*
+
     int cursor_pos = 1;                                     //start on first valid letter
     int prev_cursor_pos = cursor_pos;
     int curr_state = initial_state;                         //start with first state
@@ -265,7 +286,7 @@ int main(){
     printf("\x1b[3;1f");                        //move to 3,1
     printf("finished!\n");
 
-    */
+    
 
     printf("\x1b[?25h");                    //cursor is back to being visible
     printf(RESET_STYLE);
